@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -30,32 +31,43 @@ namespace DBPlayground
             TodoCollection = mongoDB.GetCollection<TodoModel>(collectionName);
         }
         
-        public async Task InsertTodo(TodoModel todo) => await TodoCollection.InsertOneAsync(todo);
-
-        public async Task<List<TodoModel>> GetAllTodos() {
+        public async Task InsertTodoAsync(TodoModel todo) => await TodoCollection.InsertOneAsync(todo);
+        public void InsertTodo(TodoModel todo){
+            TodoCollection.InsertOne(todo);
+        }
+        public async Task<List<TodoModel>> GetAllTodosAsync() {
             var todos = new List<TodoModel>();
             var allDocument = await TodoCollection.FindAsync(new BsonDocument());
             await allDocument.ForEachAsync(doc => todos.Add(doc));
+            return todos;
+        }
+
+        public List<TodoModel> GetAllTodos() {
+            var todos = new List<TodoModel>();
+            var allDocument = TodoCollection.Find(new BsonDocument()).ToListAsync().Result;
+            allDocument.ForEach(doc => todos.Add(doc));
             return todos;
         }
     }
     
     public class MongoDemo
     {
-        private static MongoDBService mogoDbService = new MongoDBService("mongodb://user:user123@ds119618.mlab.com:19618", "db_todo", "todos");
+        private static MongoDBService mogoDbService =  new MongoDBService("mongodb://user:user123@ds119618.mlab.com:19618", 
+                                                                          "db_todo", 
+                                                                          "todos");
             
-        public static async void InsertData()
+        public static void InsertData()
         {
             TodoModel todo = new TodoModel()
             {
                 Title="Todo title",
                 Completed=false
             };
-            await mogoDbService.InsertTodo(todo);
+            mogoDbService.InsertTodo(todo);
         }
-        public static async void  GetData() 
+        public static void  GetData() 
         {
-             List<TodoModel> allTodos = await mogoDbService.GetAllTodos();
+             List<TodoModel> allTodos = mogoDbService.GetAllTodos();
              foreach(var todo in allTodos)
              {
                  Console.WriteLine(todo.Title);
