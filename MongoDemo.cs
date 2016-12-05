@@ -7,19 +7,11 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Bson.Serialization.Attributes;
 
+using DBPlayground.Models;
+
 namespace DBPlayground
 {
-    public class TodoModel
-    {
-        [BsonId]
-        public ObjectId TodoId { get; set; }
-
-        [BsonRequired]
-        public string Title { get; set; }
-
-        public bool Completed { get; set; } = false;
-        public DateTime? OpTime { get; set; } = null;
-    }
+   
     public class MongoDBService
     {
         private IMongoCollection<TodoModel> TodoCollection { get; }
@@ -52,10 +44,23 @@ namespace DBPlayground
     
     public class MongoDemo
     {
-        private static MongoDBService mogoDbService =  new MongoDBService("mongodb://user:user123@ds119618.mlab.com:19618", 
+        // If add auth on one database, the dbUrl has to include databaes name at the end. 
+        private static MongoDBService mogoDbService =  new MongoDBService("mongodb://user:user123@ds119618.mlab.com:19618/db_todo", 
                                                                           "db_todo", 
                                                                           "todos");
-            
+
+        public static void FindData()
+        {
+            var client = new MongoClient("mongodb://user:user123@ds119618.mlab.com:19618/db_todo");
+            var db = client.GetDatabase("db_todo");
+            var coll = db.GetCollection<TodoModel>("todos");
+
+            var todos = coll.Find(t => t.Title == "a").ToListAsync().Result;
+            foreach(var todo in todos)
+            {
+                Console.WriteLine(todo.Title);
+            }
+        }    
         public static void InsertData()
         {
             TodoModel todo = new TodoModel()

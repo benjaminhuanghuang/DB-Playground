@@ -12,9 +12,9 @@ namespace DBPlayground
     {
         public static void Main(string[] args)
         {
-            // MongoDemo.InsertData();
-            // MongoDemo.GetData();
-            MongoDemo1.Demo();
+            MongoDemo.InsertData();
+            MongoDemo.GetData();
+            MongoDemo.FindData();
         }
     }
 }
